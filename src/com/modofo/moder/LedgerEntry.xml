@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE sqlMap      
+    PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"      
+    "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="LedgerEntry">
+	<typeAlias alias="entry" type="com.modofo.moder.model.LedgerEntry" />
+	<typeAlias alias="repay" type="com.modofo.moder.model.Repayment" />
+	<resultMap id="EntryResult" class="entry">
+		<result property="id" column="ID"/>
+		<result property="name" column="NAME" />
+		<result property="principal" column="PRINCIPAL" javaType="double" />
+		<result property="rate" column="RATE" javaType="double" />
+		<result property="interest" column="INTEREST" javaType="double" />
+		<result property="paidInterest" column="PAIDINTEREST" javaType="double" nullValue="0"/>
+		<result property="startDate" column="STARTDATE" />
+		<result property="period" column="PERIOD" />
+		<result property="compound" column="COMPOUND" />
+		<result property="status" column="STATUS" />
+	</resultMap>
+	<resultMap id="RepayResult" class="repay">
+		<result property="id" column="ID"/>
+		<result property="ledgerId" column="ledgerid" />
+		<result property="repaysum" column="repaysum" javaType="double" />
+		<result property="repayDate" column="repayDATE" />
+		<result property="type" column="type" />
+	</resultMap>
+
+	<select id="searchbyname0" parameterClass="entry"
+		resultMap="EntryResult">
+		select
+		le.id,name,principal,rate,startdate,period,compound,status,interest
+		from t_ledger_entry le
+		where le.status=1 
+		<isNotNull prepend="and" property="name">
+			le.name like '%$name$%'
+		</isNotNull>
+	</select>
+
+	<select id="searchbyname" parameterClass="entry"
+		resultMap="EntryResult">
+		select
+		le.id,le.name,le.principal,le.rate,le.startdate,le.period,le.compound,le.status,le.interest,rp.type as type,sum(rp.repaysum) as paidInterest
+		from t_ledger_entry le left outer join t_repayment rp on le.id=rp.ledgerid
+		where rp.type = 'interest' or rp.type is null
+		group by le.id,le.name,le.principal,le.rate,le.startdate,le.period,le.compound,le.status,le.interest,type
+		having le.status=1 
+		<isNotNull prepend="and" property="name">
+			le.name like '%$name$%'
+		</isNotNull>
+	</select>
+
+	<insert id="addEntry" parameterClass="entry">
+		insert into t_ledger_entry (
+		name,principal,rate,startdate,period,compound,status,interest
+		)
+		values ( 
+		#name#, #principal#,#rate#,#startDate#,#period#,#compound#,1,0 )
+	</insert>
+
+	<update id="updateEntry" parameterClass="entry">
+		update t_ledger_entry set name = #name#, principal = #principal#, startdate =
+		#startDate#, period = #period#,compound=#compound# , status = #status#,
+		rate=#rate#, interest=#interest#  where id = #id#
+	</update>
+
+	<delete id="deleteEntry" parameterClass="entry">
+		update t_ledger_entry set status = 0 where id = #id#
+	</delete>
+
+	<insert id="addRepayment" parameterClass="repay">
+		insert into t_repayment (
+		ledgerid,repaysum,repaydate,type
+		)
+		values ( 
+		#ledgerId#,#repaysum#,#repayDate#,#type#)
+	</insert>
+	
+	<select id="getRepayment" parameterClass="entry"
+		resultMap="RepayResult">
+		select
+		id,ledgerid,repaysum,repaydate,type
+		from t_repayment where ledgerid=#id#
+	</select>
+
+	<select id="getPaidInterest" parameterClass="repay" resultClass="integer">
+		select sum(repaysum) as value
+		from t_repayment where ledgerid=#ledgerId# and type='interest'
+	</select>
+</sqlMap>

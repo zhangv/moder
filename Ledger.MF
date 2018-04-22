@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.7.0
+Created-By: 1.6.0_02-b06 (Sun Microsystems Inc.)
+Main-Class: com.modofo.moder.Launcher
+Class-Path: lib/ibatis.jar  lib/spring-core.jar lib/spring-ibatis.jar 
+ lib/spring-beans.jar lib/spring-jdbc.jar lib/sprin
+ g-context.jar lib/commons-logging.jar lib/commons-dbcp.jar  lib/commo
+ ns-pool.jar  lib/alloy.jar lib/spring-orm.jar lib/spring-tx.jar
+

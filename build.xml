@@ -1,0 +1,53 @@
+<project name="moder" default="init" basedir=".">
+	<!-- = = = = = = = = = = = = = = = = =
+	          target: init
+	         = = = = = = = = = = = = = = = = = -->
+	<target name="init" description="init deploy environment">
+		<native2ascii src="./backup/" dest="./src" includes="*.properties" ext=".properties" />
+		<mkdir dir="build" />
+	</target>
+	<target name="clean">
+		<delete>
+			<fileset dir="build">
+				<include name="**/*.*" />
+			</fileset>
+		</delete>
+	</target>
+
+
+	<target name="dist" depends="compile">
+		<jar manifest="Moder.MF" destfile="dist/gaodan1.jar">
+			<fileset dir="build">
+				<include name="**/*.*" />
+			</fileset>
+		</jar>
+		<jar manifest="Ledger.MF" destfile="dist/gaodan2.jar">
+			<fileset dir="build">
+				<include name="**/*.*" />
+			</fileset>
+		</jar>
+		
+		<copy todir="dist">
+			<fileset dir=".">
+				<include name="lib/*.jar" />
+				<include name="db/*.*"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac srcdir="./src" destdir="./build" includes="**/*.java">
+			<classpath>
+				<fileset dir="./lib">
+					<include name="*.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+		<copy todir="build">
+			<fileset dir="src">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+</project>
+
